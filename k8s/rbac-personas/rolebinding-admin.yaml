@@ -1,0 +1,17 @@
+# Namespace-scoped admin: binds the built-in aggregated ClusterRole "admin"
+# via a RoleBinding (not a ClusterRoleBinding), so members can manage
+# everything inside payments (including RBAC and Secrets) but have zero
+# access outside this namespace - not cluster-admin.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: payments-admins
+  namespace: payments
+subjects:
+  - kind: Group
+    name: "payments:admins"
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: admin
+  apiGroup: rbac.authorization.k8s.io

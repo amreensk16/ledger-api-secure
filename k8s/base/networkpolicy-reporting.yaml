@@ -1,0 +1,26 @@
+# reporting is a read-only observer (RBAC scoped to get/list/watch pods and
+# services - see rbac-reporting.yaml) and is demonstrated purely via
+# `kubectl auth can-i --as=...` from outside the cluster, so it needs no
+# inbound access and no egress beyond DNS.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: reporting
+  namespace: payments
+spec:
+  podSelector:
+    matchLabels:
+      app: reporting
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

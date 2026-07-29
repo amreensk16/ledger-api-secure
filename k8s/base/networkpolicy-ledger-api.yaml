@@ -1,0 +1,49 @@
+# NetworkPolicy can only filter by IP/CIDR and namespace/pod selectors, not by
+# hostname - so it cannot itself enforce the example.com/httpbin.org allowlist.
+# That allowlist is enforced in-app (see app.py's FETCH_ALLOWLIST check). This
+# policy provides the layer NetworkPolicy *can* provide: only ingress-nginx
+# may reach ledger-api, DNS resolution is allowed, and egress is otherwise
+# limited to standard web ports rather than left wide open to every protocol.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ledger-api
+  namespace: payments
+spec:
+  podSelector:
+    matchLabels:
+      app: ledger-api
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 169.254.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80

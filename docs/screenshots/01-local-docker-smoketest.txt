@@ -1,0 +1,18 @@
+== health ==
+{"env":"production","status":"ok"}
+
+== tokenize ==
+{"last4":"4242","token":"tok_477bba133c182267fe5f0869"}
+
+== import RCE payload neutralized ==
+{"loaded":"None"}
+
+== SSRF to cloud metadata blocked ==
+HTTP 403
+== SSRF to non-allowlisted host blocked ==
+HTTP 403
+== running as non-root ==
+uid=10001(appuser) gid=10001(appgroup) groups=10001(appgroup)
+== root filesystem is read-only ==
+touch: cannot touch '/app/should_fail': Read-only file system
+WRITE_BLOCKED_AS_EXPECTED

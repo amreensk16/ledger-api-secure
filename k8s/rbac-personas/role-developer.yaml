@@ -1,0 +1,17 @@
+# Read-only visibility for day-to-day development: can see workloads, config,
+# and logs, but cannot change anything and cannot read Secrets.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: payments-developer
+  namespace: payments
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps", "events"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch"]

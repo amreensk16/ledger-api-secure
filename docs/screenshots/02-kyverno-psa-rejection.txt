@@ -1,0 +1,11 @@
+== PSA restricted rejects insecure pod (no securityContext, :latest) ==
+(command: kubectl apply -f <insecure pod: root, no securityContext, nginx:latest>)
+Error from server (Forbidden): pods "policy-test-root" is forbidden: violates PodSecurity "restricted:latest": allowPrivilegeEscalation != false (container "test" must set securityContext.allowPrivilegeEscalation=false), unrestricted capabilities (container "test" must set securityContext.capabilities.drop=["ALL"]), runAsNonRoot != true (pod or container "test" must set securityContext.runAsNonRoot=true), seccompProfile (pod or container "test" must set securityContext.seccompProfile.type to "RuntimeDefault" or "Localhost")
+
+== Kyverno disallow-latest-tag independently rejects a PSA-COMPLIANT pod using :latest ==
+(command: kubectl apply -f <PSA-compliant pod, image nginx:latest>)
+admission webhook "validate.kyverno.svc-fail" denied the request:
+disallow-latest-tag: validate-tag: 'validation error: The '':latest'' tag is not allowed; use an immutable version tag or digest.'
+
+== Fully compliant pod (correct securityContext + pinned tag) is admitted ==
+pod/policy-test-good created

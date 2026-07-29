@@ -1,0 +1,21 @@
+# Reference clone of the original vulnerable app (kept locally, never shipped)
+/_src_ledger-api/
+/_src_ledger-api-reference/
+
+# Claude Code local session state
+/.claude/
+
+# cosign private key material must never be committed
+*.key
+cosign.key
+
+# defense-in-depth: raw/unsealed secret manifests must never be committed
+*.raw-secret.yaml
+*-plaintext.yaml
+
+# local kubeconfig dumps
+kubeconfig*.yaml
+
+__pycache__/
+*.pyc
+.DS_Store

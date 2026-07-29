@@ -1,0 +1,27 @@
+# Least-privilege boundary for the "reporting" neighbour: read-only visibility
+# into pods/services in its own namespace, and explicitly nothing on
+# secrets/configmaps. Proves the neighbour pod cannot read ledger-api's
+# secrets even though it shares the namespace.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: reporting-read
+  namespace: payments
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: reporting-read
+  namespace: payments
+subjects:
+  - kind: ServiceAccount
+    name: reporting
+    namespace: payments
+roleRef:
+  kind: Role
+  name: reporting-read
+  apiGroup: rbac.authorization.k8s.io

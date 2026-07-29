@@ -1,0 +1,38 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-non-root-user
+  annotations:
+    policies.kyverno.io/title: Require Non-Root User
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/description: >-
+      Containers must not run as root. Requires runAsNonRoot=true at both the
+      pod and container level, dropping ALL capabilities, no privilege
+      escalation, and a RuntimeDefault seccomp profile.
+spec:
+  background: true
+  rules:
+    - name: check-non-root-and-hardening
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      validate:
+        failureAction: Enforce
+        message: >-
+          Containers must set runAsNonRoot=true, drop all capabilities,
+          disable privilege escalation, and use seccompProfile RuntimeDefault
+          at both pod and container level.
+        pattern:
+          spec:
+            securityContext:
+              runAsNonRoot: true
+              seccompProfile:
+                type: RuntimeDefault
+            containers:
+              - securityContext:
+                  runAsNonRoot: true
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                      - ALL

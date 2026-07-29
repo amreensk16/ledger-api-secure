@@ -1,0 +1,20 @@
+# Everything a developer can see, plus the ability to roll/scale/debug
+# workloads day-to-day. Still no access to Secrets and no RBAC self-service.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: payments-operator
+  namespace: payments
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps", "events"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods/log", "pods/exec"]
+    verbs: ["get", "create"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments/scale"]
+    verbs: ["update", "patch"]
