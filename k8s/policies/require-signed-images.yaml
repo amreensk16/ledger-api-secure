@@ -7,10 +7,14 @@ metadata:
     policies.kyverno.io/severity: high
     policies.kyverno.io/description: >-
       ledger-api images must carry a valid cosign signature from our key pair
-      before they may run. Scoped to ghcr.io/<owner>/ledger-api only, since we
-      can't sign third-party images (e.g. curlimages/curl) that we don't
+      before they may run. Scoped to ghcr.io/amreensk16/ledger-api only, since
+      we can't sign third-party images (e.g. curlimages/curl) that we don't
       build ourselves - that is a deliberate scope limit, documented in the
-      README, not an oversight.
+      README, not an oversight. Rekor transparency-log verification is
+      disabled (ignoreTlog) because this environment's network intercepts TLS
+      to rekor.sigstore.dev; verification still requires a valid signature
+      from cosign.pub, it just doesn't additionally require a public
+      transparency-log entry.
 spec:
   background: false
   rules:
@@ -22,11 +26,16 @@ spec:
               namespaces: ["payments"]
       verifyImages:
         - imageReferences:
-            - "ghcr.io/GHCR_OWNER_PLACEHOLDER/ledger-api:*"
+            - "ghcr.io/amreensk16/ledger-api:*"
           failureAction: Enforce
           attestors:
             - count: 1
               entries:
                 - keys:
                     publicKeys: |-
-                      COSIGN_PUBLIC_KEY_PLACEHOLDER
+                      -----BEGIN PUBLIC KEY-----
+                      MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE9q8YZkY1xDYCvrTXTLwG2acMvqxi
+                      mnzPft0xbWBqBfNeA9DTCckB7ypdwhpAUUpaBSR4w7bx2ZmfJGCL9RTP3A==
+                      -----END PUBLIC KEY-----
+                    rekor:
+                      ignoreTlog: true

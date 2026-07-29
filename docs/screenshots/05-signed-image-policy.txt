@@ -1,0 +1,8 @@
+== Signed ledger-api image is admitted ==
+(pod using ghcr.io/amreensk16/ledger-api:d006d80, cosign-signed with cosign.pub)
+pod/policy-test-signed created
+
+== Unsigned image matching the same ghcr.io/amreensk16/ledger-api:* pattern is rejected ==
+(pod using ghcr.io/amreensk16/ledger-api:unsigned-test2, genuinely different unsigned content)
+Error from server: admission webhook "mutate.kyverno.svc-fail" denied the request:
+require-signed-images: verify-ledger-api-signature: 'failed to verify image ghcr.io/amreensk16/ledger-api:unsigned-test2: .attestors[0].entries[0].keys: no signatures found'

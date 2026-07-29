@@ -1,0 +1,29 @@
+== kubectl get pods -n payments ==
+NAME                         READY   STATUS    RESTARTS        AGE     IP            NODE                          NOMINATED NODE   READINESS GATES
+ledger-api-548fdbc68-d8knj   1/1     Running   2 (4m58s ago)   6m44s   10.244.0.16   ledger-secure-control-plane   <none>           <none>
+ledger-api-548fdbc68-fw78z   1/1     Running   2 (4m58s ago)   6m44s   10.244.0.18   ledger-secure-control-plane   <none>           <none>
+ledger-api-548fdbc68-rbcrr   1/1     Running   2 (4m58s ago)   6m44s   10.244.0.17   ledger-secure-control-plane   <none>           <none>
+reporting-5fd57bd9bc-zkhgf   1/1     Running   0               6m44s   10.244.0.19   ledger-secure-control-plane   <none>           <none>
+
+== kubectl get deploy,svc,ingress -n payments ==
+NAME                         READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/ledger-api   3/3     3            3           6m45s
+deployment.apps/reporting    1/1     1            1           6m45s
+
+NAME                 TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+service/ledger-api   ClusterIP   10.96.239.15   <none>        8080/TCP   6m48s
+
+NAME                                   CLASS   HOSTS          ADDRESS      PORTS   AGE
+ingress.networking.k8s.io/ledger-api   nginx   ledger.local   172.20.0.2   80      6m45s
+
+== Sealed Secret decrypted correctly (no plaintext in git) ==
+NAME                 TYPE     DATA   AGE
+ledger-api-secrets   Opaque   2      6m45s
+
+== ledger-api reachable via Ingress (nginx, host ledger.local) ==
+GET /health -> {"env":"production","status":"ok"}
+
+GET /transactions -> {"transactions":[{"amount":4200,"currency":"USD","id":"txn_1001","pan":"4242424242424242","status":"captured"},{"amount":1899,"currency":"EUR","id":"txn_1002","pan":"5555555555554444","status":"refunded"}]}
+
+POST /tokenize -> {"last4":"4242","token":"tok_477bba133c182267fe5f0869"}
+

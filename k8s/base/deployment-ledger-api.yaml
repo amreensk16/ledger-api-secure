@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: ledger-api
-          image: ghcr.io/GHCR_OWNER_PLACEHOLDER/ledger-api:IMAGE_TAG_PLACEHOLDER
+          image: ghcr.io/amreensk16/ledger-api:d006d80
           imagePullPolicy: IfNotPresent
           securityContext:
             runAsNonRoot: true

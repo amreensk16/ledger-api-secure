@@ -1,0 +1,21 @@
+== reporting SA: read-only on pods/services, no secrets access ==
+kubectl auth can-i list pods   --as=system:serviceaccount:payments:reporting -n payments  -> yes
+kubectl auth can-i get secrets --as=system:serviceaccount:payments:reporting -n payments  -> no
+
+== ledger-api SA: zero permissions, no Role bound at all ==
+kubectl auth can-i get pods    --as=system:serviceaccount:payments:ledger-api -n payments  -> no
+
+== developer persona: read-only, no writes, no secrets ==
+kubectl auth can-i get pods            --as=jane --as-group=payments:developers -n payments -> yes
+kubectl auth can-i update deployments   --as=jane --as-group=payments:developers -n payments -> no
+kubectl auth can-i get secrets          --as=jane --as-group=payments:developers -n payments -> no
+
+== operator persona: can update/scale deployments, still no secrets ==
+kubectl auth can-i update deployments   --as=sam --as-group=payments:operators -n payments -> yes
+kubectl auth can-i get secrets          --as=sam --as-group=payments:operators -n payments -> no
+
+== admin persona: full control in-namespace, but NOT cluster-admin ==
+kubectl auth can-i get secrets         --as=alex --as-group=payments:admins -n payments   -> yes
+kubectl auth can-i delete namespaces   --as=alex --as-group=payments:admins -n payments   -> Warning: resource 'namespaces' is not namespace scoped
+
+no

@@ -1,0 +1,23 @@
+=== 1. Original vulnerable Deployment (hardcoded secrets, no securityContext, ledger-api:starter) ===
+Warning: would violate PodSecurity "restricted:latest": allowPrivilegeEscalation != false (container "ledger-api" must set securityContext.allowPrivilegeEscalation=false), unrestricted capabilities (container "ledger-api" must set securityContext.capabilities.drop=["ALL"]), runAsNonRoot != true (pod or container "ledger-api" must set securityContext.runAsNonRoot=true), seccompProfile (pod or container "ledger-api" must set securityContext.seccompProfile.type to "RuntimeDefault" or "Localhost")
+Error from server: error when creating "docs/insecure-baseline/deployment.yaml": admission webhook "validate.kyverno.svc-fail" denied the request: 
+
+resource Deployment/payments/ledger-api was blocked due to the following policies 
+
+require-non-root-user:
+  autogen-check-non-root-and-hardening: 'validation error: Containers must set runAsNonRoot=true,
+    drop all capabilities, disable privilege escalation, and use seccompProfile RuntimeDefault
+    at both pod and container level. rule autogen-check-non-root-and-hardening failed
+    at path /spec/template/spec/containers/0/securityContext/'
+
+=== 2. PSA-compliant securityContext but :latest tag (isolates Kyverno's contribution) ===
+Error from server: error when creating "docs/insecure-baseline/deployment-latest-tag-variant.yaml": admission webhook "validate.kyverno.svc-fail" denied the request: 
+
+resource Deployment/payments/ledger-api-latest-tag-variant was blocked due to the following policies 
+
+disallow-latest-tag:
+  autogen-validate-tag: 'validation error: The '':latest'' tag is not allowed; use
+    an immutable version tag or digest. rule autogen-validate-tag failed at path /spec/template/spec/containers/0/image/'
+
+OK: deployment/ledger-api was not created (rejected as expected)
+OK: deployment/ledger-api-latest-tag-variant was not created (rejected as expected)

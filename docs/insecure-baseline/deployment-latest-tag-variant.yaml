@@ -1,0 +1,43 @@
+# Fixture used only to isolate Kyverno's contribution from PSA's: this
+# Deployment has a fully PSA-"restricted"-compliant securityContext (so PSA
+# admits it), but still uses the mutable `:latest` tag. Kyverno's
+# disallow-latest-tag policy rejects it on that basis alone, proving Kyverno
+# catches a real class of problem (mutable/unpinned image tags) that Pod
+# Security Admission does not check at all.
+#
+# Deliberately uses nginx (not ghcr.io/amreensk16/ledger-api) so that only
+# disallow-latest-tag fires - require-signed-images is scoped to our own
+# image and would otherwise also reject this, muddying the demonstration.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ledger-api-latest-tag-variant
+  namespace: payments
+  labels:
+    app: ledger-api-latest-tag-variant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ledger-api-latest-tag-variant
+  template:
+    metadata:
+      labels:
+        app: ledger-api-latest-tag-variant
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ledger-api
+          image: nginx:latest
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
