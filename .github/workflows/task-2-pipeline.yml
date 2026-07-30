@@ -119,7 +119,13 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          # GITHUB_TOKEN can't push here: this package was first published by
+          # a manual `docker push` (Task 1), not by an Actions run in this
+          # repo, so GHCR never auto-linked it to this repository - and
+          # personal-account (non-org) packages have no API to link them
+          # after the fact, only the web UI's "Manage Actions access". A PAT
+          # with write:packages avoids that entirely.
+          password: ${{ secrets.GHCR_PAT }}
       - name: Build and push
         id: build
         uses: docker/build-push-action@v6
@@ -177,6 +183,11 @@ jobs:
       id-token: write # required for keyless cosign signing via GitHub OIDC
     steps:
       - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }} # cosign pushes signatures/attestations to the registry too - see build-push's login step for why GITHUB_TOKEN can't be used here
       - uses: sigstore/cosign-installer@v3
         with:
           # Same pin as task-1-build.yml and for the same reason: v2.x stores
