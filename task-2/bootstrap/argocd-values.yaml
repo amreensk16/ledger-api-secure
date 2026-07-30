@@ -1,0 +1,6 @@
+configs:
+  params:
+    server.insecure: true # plain HTTP for local port-forward access; fine for a local-only kind cluster
+server:
+  service:
+    type: ClusterIP

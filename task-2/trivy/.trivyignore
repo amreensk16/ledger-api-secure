@@ -9,3 +9,17 @@
 #
 # Example (not currently active - no CVEs have been triaged/accepted yet):
 # CVE-2024-XXXXX exp:2026-10-01 accepted: no upstream fix, low exploitability in our usage, revisit at expiry
+
+# Both of these are embedded inside python:3.11-slim's own CPython
+# distribution (ensurepip's bundled setuptools wheel, and a vendored
+# msgpack inside pip's own internals) - static artifacts baked into the
+# Python release itself, not something `pip install --upgrade` touches (we
+# already upgraded pip/setuptools/wheel in the Dockerfile; the site-packages
+# copies Trivy separately reports are clean). Our Flask app never invokes
+# ensurepip or pip's internal vendored code paths at runtime, so there is no
+# reachable attack surface here. Revisit at expiry: either a newer
+# python:3.11-slim patch release ships an updated ensurepip bundle, or strip
+# ensurepip/pip's vendor directory from the final image as a follow-up
+# hardening step.
+GHSA-6v7p-g79w-8964 exp:2026-10-30 msgpack embedded in pip's vendored deps inside python:3.11-slim - not reachable at runtime, revisit at expiry
+CVE-2025-47273 exp:2026-10-30 setuptools embedded in ensurepip's bundled wheel inside python:3.11-slim - not reachable at runtime, revisit at expiry

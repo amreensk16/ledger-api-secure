@@ -10,7 +10,11 @@ RUN groupadd --gid 10001 appgroup \
     && useradd --uid 10001 --gid appgroup --no-create-home --shell /usr/sbin/nologin appuser
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# python:3.11-slim ships an old vendored pip/setuptools/wheel that Trivy
+# flags with fixable HIGH CVEs (setuptools' vendored jaraco.context and
+# wheel) - upgrade them explicitly rather than suppress the finding.
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
+    && pip install --no-cache-dir -r requirements.txt
 
 COPY app.py .
 
