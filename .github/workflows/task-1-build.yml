@@ -1,11 +1,11 @@
-name: build
+name: task-1-build
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
-      - "app/**"
-      - ".github/workflows/build.yml"
+      - "task-1/app/**"
+      - ".github/workflows/task-1-build.yml"
   workflow_dispatch: {}
 
 permissions:
@@ -34,7 +34,7 @@ jobs:
           # require-signed-images Kyverno policy verifies against. Newer
           # cosign (3.x) defaults to OCI 1.1 Referrers storage, which GHCR
           # does not fully support and Kyverno cannot discover as a result -
-          # see docs/architecture.md for the full writeup of this issue.
+          # see task-1/docs/architecture.md for the full writeup of this issue.
           cosign-release: "v2.4.1"
 
       - name: Build and push (tagged by commit SHA, never :latest)
@@ -42,7 +42,7 @@ jobs:
         run: |
           IMAGE="ghcr.io/${{ github.repository_owner }}/ledger-api:${{ github.sha }}"
           echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
-          docker build --provenance=false --sbom=false -t "$IMAGE" ./app
+          docker build --provenance=false --sbom=false -t "$IMAGE" ./task-1/app
           docker push "$IMAGE"
 
       - name: Sign image with cosign (key pair, private key from repo secrets)
