@@ -6,7 +6,7 @@ metadata:
   labels:
     app: ledger-api
 spec:
-  replicas: 3
+  replicas: 2 # reduced from 3 in Task 3 - this lab's single kind node is memory-constrained once every pod carries an Istio sidecar, and 2 replicas leaves headroom for the canary (ledger-api-canary) demo. Not a security-relevant change.
   selector:
     matchLabels:
       app: ledger-api
@@ -14,6 +14,7 @@ spec:
     metadata:
       labels:
         app: ledger-api
+        version: v1 # Task 3: distinguishes this from the ledger-api-canary (v2) subset for the canary demo
     spec:
       serviceAccountName: ledger-api
       automountServiceAccountToken: false
