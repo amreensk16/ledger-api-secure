@@ -8,7 +8,7 @@ tooling: a `kind` Kubernetes cluster + GitHub Actions, no cloud account.
 | [`task-1/`](task-1/) | Deploy & harden `ledger-api`: securityContext, RBAC, Sealed Secrets, Kyverno admission policies, PSA `restricted` | ✅ complete |
 | [`task-2/`](task-2/) | Secure CI/CD & software supply chain: SAST/SCA/secrets/image scanning gates, keyless cosign + SLSA provenance, GitOps with ArgoCD | ✅ complete |
 | [`task-3/`](task-3/) | Istio service mesh: mTLS STRICT, identity-based `AuthorizationPolicy`, defense-in-depth with NetworkPolicy | ✅ complete |
-| `task-4/` | Recon (OSINT) + authorized penetration test, delivered as a standalone report | ⏳ not started |
+| [`task-4/`](task-4/) | Recon (OSINT) + authorized penetration test, delivered as a standalone report | ✅ complete |
 
 Each task folder has its own README with the approach, design decisions,
 setup steps, and a "show it working" evidence section - read those for the
@@ -38,8 +38,12 @@ full detail. This top-level README is just the index.
   Ingress Gateway now replaces it as the access path. `task-1/scripts/verify-all.sh`'s
   ingress-nginx health check is expected to fail from here on - see
   `task-3/README.md`'s "Known, intentional regression" section.
-- Task 4's passive recon (Part A) targets `dodopayments.tech` using only
+- Task 4's passive recon (Part A) targeted `dodopayments.tech` using only
   public data sources, per the assignment's rules of engagement. Active
-  testing (Part B) targets only the explicitly authorized local vulnerable
-  app named in the assignment materials - never any `dodopayments.tech` or
-  `dodopayments.com` host.
+  testing (Part B) targeted only the explicitly authorized local vulnerable
+  app (the same `bhabani-dodo/ledger-api-assignment` source Task 1 hardened,
+  run unmodified and locally, never any `dodopayments.tech`/`.com` host) -
+  see `task-4/report.md` for the full findings, including a confirmed
+  unauthenticated-RCE-to-payment-credential-theft chain and a retest proving
+  which findings Task 1's hardening actually closed vs. which remain open
+  application-layer gaps.

@@ -1,0 +1,9 @@
+crt.sh (https://crt.sh/?q=%25.dodopayments.tech&output=json) returned HTTP 502
+on every attempt during this assessment (multiple retries, several minutes
+apart) - a known, frequent availability issue with that specific
+single-volunteer-run free service, not a finding about the target.
+
+This did not materially limit discovery: subfinder and amass (see
+subfinder-output.txt and amass-passive-output.txt) both independently query
+crt.sh internally as one of several passive sources, with their own retry
+logic, and both returned results successfully.

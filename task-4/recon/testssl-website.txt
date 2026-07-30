@@ -1,0 +1,201 @@
+
+'--fast' can have some undesired side effects thus it is not recommended to use anymore
+
+#####################################################################
+  testssl.sh version 3.2.4 from https://testssl.sh/
+
+  This program is free software. Distribution and modification under
+  GPLv2 permitted. USAGE w/o ANY WARRANTY. USE IT AT YOUR OWN RISK!
+
+  Please file bugs @ https://testssl.sh/bugs/
+#####################################################################
+
+  Using OpenSSL 1.0.2-bad (Mar 28 2025)  [~183 ciphers]
+  on c1481d87b451:/home/testssl/bin/openssl.Linux.x86_64
+
+Testing all IP addresses (port 443): 104.18.11.178 104.18.10.178
+-----------------------------------------------------
+ Start 2026-07-30 12:03:50        -->> 104.18.11.178:443 (website.dodopayments.tech) <<--
+
+ Further IP addresses:   104.18.10.178 2606:4700:9761:4cfa:7576:46:894b:d274 
+ rDNS (104.18.11.178):   --
+ Service detected:       HTTP
+
+ Testing protocols via sockets except NPN+ALPN 
+
+ SSLv2      not offered (OK)
+ SSLv3      not offered (OK)
+ TLS 1      offered (deprecated)
+ TLS 1.1    offered (deprecated)
+ TLS 1.2    offered (OK)
+ TLS 1.3    offered (OK): final
+ ALPN/HTTP2 h2, http/1.1 (offered)
+
+ Testing server defaults (Server Hello) 
+
+ TLS extensions (standard)    "server name/#0" "EC point formats/#11"
+                              "application layer protocol negotiation/#16"
+                              "extended master secret/#23"
+                              "compress_certificate/#27" "session ticket/#35"
+                              "supported versions/#43" "key share/#51"
+                              "next protocol/#13172"
+                              "renegotiation info/#65281"
+ Session Ticket RFC 5077 hint 64800 seconds, session tickets keys seems to be rotated < daily
+ SSL Session ID support       yes
+ Session Resumption           Tickets: yes, ID: yes
+ TLS clock skew               0 sec from localtime
+ Certificate Compression      0002/Brotli
+ Client Authentication        none
+
+  Server Certificate #1
+   Signature Algorithm          SHA256 with RSA
+   Server key size              RSA 2048 bits (exponent is 65537)
+   Server key usage             Digital Signature, Key Encipherment
+   Server extended key usage    TLS Web Server Authentication
+   Serial                       03D66AEF9990B17A1316BD02677E2D95 (OK: length 16)
+   Fingerprints                 SHA1 4C9F981FA5BB96ACDECFCB872CF2FC151D6F339B
+                                SHA256 09F1322D8B72A1D7430EE1B1E50C2D1516B45DF1560D0C3A836B76F5D96D90A2
+   Common Name (CN)             dodopayments.tech  (request w/o SNI didn't succeed)
+   subjectAltName (SAN)         dodopayments.tech website.dodopayments.tech 
+   Trust (hostname)             Ok via SAN (SNI mandatory)
+   Chain of trust               Ok   
+   EV cert (experimental)       no 
+   Certificate Validity (UTC)   expires < 60 days (59) (2026-06-29 14:13 --> 2026-09-27 15:11)
+   ETS/"eTLS", visibility info  not present
+   Certificate Revocation List  http://c.pki.goog/wr1/64cgrqpdQXE.crl
+   OCSP URI                     --
+   OCSP stapling                not offered
+   OCSP must staple extension   --
+   DNS CAA RR (experimental)    not offered
+   Certificate Transparency     yes (certificate extension)
+   Certificates provided        3
+   Issuer                       WR1 (Google Trust Services from US)
+   Intermediate cert validity   #1: ok > 40 days (2029-02-20 14:00). WR1 <-- GTS Root R1
+                                #2: ok > 40 days (2028-01-28 00:00). GTS Root R1 <-- GlobalSign Root CA
+   Intermediate Bad OCSP (exp.) Ok
+
+  Server Certificate #2
+   Signature Algorithm          ECDSA with SHA256
+   Server key size              EC 256 bits (curve P-256)
+   Server key usage             Digital Signature
+   Server extended key usage    TLS Web Server Authentication
+   Serial                       51299B76884E073E0E381DD07EE98316 (OK: length 16)
+   Fingerprints                 SHA1 174C6D13D62E82C52513E9A74A01BBD7BA5F74B3
+                                SHA256 289C1305D72C257AEC937D7C6120D35398E5B06885E6B5529B2B07B3437F51CC
+   Common Name (CN)             dodopayments.tech  (request w/o SNI didn't succeed, usual for EC certificates)
+   subjectAltName (SAN)         dodopayments.tech website.dodopayments.tech 
+   Trust (hostname)             Ok via SAN (SNI mandatory)
+   Chain of trust               Ok   
+   EV cert (experimental)       no 
+   Certificate Validity (UTC)   expires < 60 days (59) (2026-06-29 14:13 --> 2026-09-27 15:13)
+   ETS/"eTLS", visibility info  not present
+   Certificate Revocation List  http://c.pki.goog/we1/ygWPENklvpM.crl
+   OCSP URI                     --
+   OCSP stapling                not offered
+   OCSP must staple extension   --
+   DNS CAA RR (experimental)    not offered
+   Certificate Transparency     yes (certificate extension)
+   Certificates provided        3
+   Issuer                       WE1 (Google Trust Services from US)
+   Intermediate cert validity   #1: ok > 40 days (2029-02-20 14:00). WE1 <-- GTS Root R4
+                                #2: ok > 40 days (2028-01-28 00:00). GTS Root R4 <-- GlobalSign Root CA
+   Intermediate Bad OCSP (exp.) Ok
+
+
+
+ Done 2026-07-30 12:05:00 [  83s] -->> 104.18.11.178:443 (website.dodopayments.tech) <<--
+
+-----------------------------------------------------
+ Start 2026-07-30 12:05:00        -->> 104.18.10.178:443 (website.dodopayments.tech) <<--
+
+ Further IP addresses:   104.18.11.178 2606:4700:9761:4cfa:7576:46:894b:d274 
+ rDNS (104.18.10.178):   --
+ Service detected:       HTTP
+
+ Testing protocols via sockets except NPN+ALPN 
+
+ SSLv2      not offered (OK)
+ SSLv3      not offered (OK)
+ TLS 1      offered (deprecated)
+ TLS 1.1    offered (deprecated)
+ TLS 1.2    offered (OK)
+ TLS 1.3    offered (OK): final
+ ALPN/HTTP2 h2, http/1.1 (offered)
+
+ Testing server defaults (Server Hello) 
+
+ TLS extensions (standard)    "server name/#0" "EC point formats/#11"
+                              "application layer protocol negotiation/#16"
+                              "extended master secret/#23"
+                              "compress_certificate/#27" "session ticket/#35"
+                              "supported versions/#43" "key share/#51"
+                              "next protocol/#13172"
+                              "renegotiation info/#65281"
+ Session Ticket RFC 5077 hint 64800 seconds, session tickets keys seems to be rotated < daily
+ SSL Session ID support       yes
+ Session Resumption           Tickets: yes, ID: yes
+ TLS clock skew               -1 sec from localtime
+ Certificate Compression      0002/Brotli
+ Client Authentication        none
+
+  Server Certificate #1
+   Signature Algorithm          SHA256 with RSA
+   Server key size              RSA 2048 bits (exponent is 65537)
+   Server key usage             Digital Signature, Key Encipherment
+   Server extended key usage    TLS Web Server Authentication
+   Serial                       03D66AEF9990B17A1316BD02677E2D95 (OK: length 16)
+   Fingerprints                 SHA1 4C9F981FA5BB96ACDECFCB872CF2FC151D6F339B
+                                SHA256 09F1322D8B72A1D7430EE1B1E50C2D1516B45DF1560D0C3A836B76F5D96D90A2
+   Common Name (CN)             dodopayments.tech  (request w/o SNI didn't succeed)
+   subjectAltName (SAN)         dodopayments.tech website.dodopayments.tech 
+   Trust (hostname)             Ok via SAN (SNI mandatory)
+   Chain of trust               Ok   
+   EV cert (experimental)       no 
+   Certificate Validity (UTC)   expires < 60 days (59) (2026-06-29 14:13 --> 2026-09-27 15:11)
+   ETS/"eTLS", visibility info  not present
+   Certificate Revocation List  http://c.pki.goog/wr1/64cgrqpdQXE.crl
+   OCSP URI                     --
+   OCSP stapling                not offered
+   OCSP must staple extension   --
+   DNS CAA RR (experimental)    not offered
+   Certificate Transparency     yes (certificate extension)
+   Certificates provided        3
+   Issuer                       WR1 (Google Trust Services from US)
+   Intermediate cert validity   #1: ok > 40 days (2029-02-20 14:00). WR1 <-- GTS Root R1
+                                #2: ok > 40 days (2028-01-28 00:00). GTS Root R1 <-- GlobalSign Root CA
+   Intermediate Bad OCSP (exp.) Ok
+
+  Server Certificate #2
+   Signature Algorithm          ECDSA with SHA256
+   Server key size              EC 256 bits (curve P-256)
+   Server key usage             Digital Signature
+   Server extended key usage    TLS Web Server Authentication
+   Serial                       51299B76884E073E0E381DD07EE98316 (OK: length 16)
+   Fingerprints                 SHA1 174C6D13D62E82C52513E9A74A01BBD7BA5F74B3
+                                SHA256 289C1305D72C257AEC937D7C6120D35398E5B06885E6B5529B2B07B3437F51CC
+   Common Name (CN)             dodopayments.tech  (request w/o SNI didn't succeed, usual for EC certificates)
+   subjectAltName (SAN)         dodopayments.tech website.dodopayments.tech 
+   Trust (hostname)             Ok via SAN (SNI mandatory)
+   Chain of trust               Ok   
+   EV cert (experimental)       no 
+   Certificate Validity (UTC)   expires < 60 days (59) (2026-06-29 14:13 --> 2026-09-27 15:13)
+   ETS/"eTLS", visibility info  not present
+   Certificate Revocation List  http://c.pki.goog/we1/ygWPENklvpM.crl
+   OCSP URI                     --
+   OCSP stapling                not offered
+   OCSP must staple extension   --
+   DNS CAA RR (experimental)    not offered
+   Certificate Transparency     yes (certificate extension)
+   Certificates provided        3
+   Issuer                       WE1 (Google Trust Services from US)
+   Intermediate cert validity   #1: ok > 40 days (2029-02-20 14:00). WE1 <-- GTS Root R4
+                                #2: ok > 40 days (2028-01-28 00:00). GTS Root R4 <-- GlobalSign Root CA
+   Intermediate Bad OCSP (exp.) Ok
+
+
+
+ Done 2026-07-30 12:05:47 [ 130s] -->> 104.18.10.178:443 (website.dodopayments.tech) <<--
+
+-----------------------------------------------------
+Done testing now all IP addresses (on port 443): 104.18.11.178 104.18.10.178
+
