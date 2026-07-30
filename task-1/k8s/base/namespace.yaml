@@ -13,3 +13,5 @@ metadata:
     pod-security.kubernetes.io/audit-version: latest
     pod-security.kubernetes.io/warn: restricted
     pod-security.kubernetes.io/warn-version: latest
+    # Task 3: enables Istio sidecar injection for every pod created here.
+    istio-injection: enabled

@@ -2,8 +2,20 @@
 # hostname - so it cannot itself enforce the example.com/httpbin.org allowlist.
 # That allowlist is enforced in-app (see app.py's FETCH_ALLOWLIST check). This
 # policy provides the layer NetworkPolicy *can* provide: only ingress-nginx
-# may reach ledger-api, DNS resolution is allowed, and egress is otherwise
-# limited to standard web ports rather than left wide open to every protocol.
+# (and, since Task 3, the Istio ingress gateway and the reporting neighbour -
+# see below) may reach ledger-api, DNS resolution is allowed, and egress is
+# otherwise limited to standard web ports rather than left wide open to every
+# protocol.
+#
+# Task 3 additions, and why: this cluster's kindnet CNI genuinely enforces
+# NetworkPolicy (verified empirically - see task-3/docs/screenshots/00-...) -
+# so once ledger-api got an Istio sidecar, its egress was blocked from
+# reaching istiod (ports 15010/15012/15014) until added explicitly below.
+# The ingress allow for `payments` namespace (not just ingress-nginx) is
+# deliberate: it lets `reporting` reach ledger-api at L3/L4, so Task 3's
+# identity-based AuthorizationPolicy demo isolates Istio's contribution
+# cleanly - reporting is blocked by *identity*, not incidentally by this
+# network-layer policy too.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -21,9 +33,15 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: ingress-nginx
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-system
+        - podSelector: {} # same-namespace pods (e.g. reporting) - identity is enforced by Istio, not here
       ports:
         - protocol: TCP
           port: 8080
+        - protocol: TCP
+          port: 15090 # Envoy stats, scraped by istiod/monitoring
   egress:
     - to:
         - namespaceSelector:
@@ -34,6 +52,17 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-system
+      ports:
+        - protocol: TCP
+          port: 15010 # istiod XDS (plaintext, unused by default but kept for completeness)
+        - protocol: TCP
+          port: 15012 # istiod XDS + CA (mTLS) - the port workload certs are actually issued over
+        - protocol: TCP
+          port: 15014 # istiod monitoring
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0
