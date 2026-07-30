@@ -132,6 +132,17 @@ existing rejection demonstrations, since every one of them targeted the
 | 4 | Manual `kubectl scale` drift detected and self-healed automatically | `docs/screenshots/04-drift-and-selfheal.txt` |
 | 5 | Both signatures and the provenance attestation independently verified after the fact | `docs/screenshots/05-verify-signatures-local.txt` |
 
+Screenshots, `screenshots/`:
+
+![Full task-2-pipeline run, all jobs green](screenshots/01-pipeline-run-success.png)
+*secrets-scan → sast → sca → build-push → image-scan → sign-attest → gitops-bump, end to end, `2m12s`.*
+
+![GitHub Security → Code scanning tab](screenshots/02-security-tab-sarif.png)
+*Semgrep and Trivy SARIF results uploaded and browsable from the pipeline's scanning gates.*
+
+![GHCR package page for ledger-api](screenshots/03-ghcr-package.png)
+*The built image alongside its `.sig` (static-key) and `.att` (SLSA-style provenance) artifacts.*
+
 Reproduce:
 
 ```bash

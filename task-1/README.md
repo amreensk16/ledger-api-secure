@@ -119,6 +119,20 @@ All captured in `docs/screenshots/`:
 | 5 | Kyverno admits the cosign-signed `ledger-api` image and rejects a genuinely unsigned one under the same image pattern | `05-signed-image-policy.txt` |
 | 6 | Full stack running: pods healthy, Sealed Secret decrypted in-cluster, `ledger-api` reachable end-to-end through `ingress-nginx` | `06-full-stack-running.txt` |
 
+Screenshots, `screenshots/`:
+
+![Pods running in the payments namespace](screenshots/01-pods-running.png)
+*`ledger-api` (x2), `ledger-api-canary`, and `reporting` all `Running` in `payments`.*
+
+![securityContext on the ledger-api container](screenshots/02-securitycontext.png)
+*`runAsNonRoot`, `readOnlyRootFilesystem`, `capabilities.drop:[ALL]`, `seccompProfile: RuntimeDefault`, non-root UID 10001.*
+
+![PSA and Kyverno rejecting the original insecure Deployment](screenshots/03-reject-insecure-demo.png)
+*The unmodified vulnerable manifest applied verbatim — PSA warns, Kyverno's `require-non-root-user` and `disallow-latest-tag` both deny it.*
+
+![SealedSecret and the decrypted Secret it produced](screenshots/04-sealed-secret.png)
+*Only ciphertext is ever committed; the controller decrypts it in-cluster.*
+
 Reproduce any of these directly:
 
 ```bash

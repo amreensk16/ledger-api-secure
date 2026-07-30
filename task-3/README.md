@@ -118,5 +118,16 @@ bash task-3/scripts/verify-networkpolicy-enforcement.sh
 bash task-3/scripts/demo-mesh-zero-trust.sh
 ```
 
+Screenshots, `screenshots/`:
+
+![The three-stage zero-trust demo](screenshots/01-zero-trust-demo.png)
+*Plaintext refused (no identity) → authenticated but 403 (denied by identity) → gateway succeeds with 200.*
+
+![NetworkPolicy enforcement verification](screenshots/02-networkpolicy-verify.png)
+*Both the unauthorized `reporting` call and an unrelated pod's call to `ledger-api` time out; kindnet genuinely enforces NetworkPolicy on this cluster.*
+
+![Live PeerAuthentication and AuthorizationPolicy resources](screenshots/03-mesh-policies-applied.png)
+*STRICT mTLS plus the default-deny and ingress-gateway-allow policies, applied in `payments`.*
+
 All screenshots referenced above are real, captured command output from this
 exact cluster - not illustrative examples.

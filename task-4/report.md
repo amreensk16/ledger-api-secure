@@ -245,3 +245,14 @@ This is an honest, load-bearing result: Task 1's infrastructure/application hard
 | `pentest/poc-05-chained-rce-to-secrets.txt` | Chained attack |
 | `pentest/poc-06-retest-against-hardened-task1-app.txt` | Retest against Task 1's patched app |
 | `pentest/ffuf-output.txt`, `pentest/nuclei-output.txt`, `pentest/sqlmap-output.txt` | Automated tooling due-diligence passes |
+
+### Screenshots
+
+![httpx live-host fingerprinting output](screenshots/01-recon-output.png)
+*Part A: fingerprint results across the discovered dodopayments.tech subdomains.*
+
+![Finding 1 PoC — RCE via YAML deserialization](screenshots/02-poc-rce.png)
+*Full request/response plus the `uid=0(root)` proof of code execution captured directly from the container.*
+
+![This report rendered on GitHub](screenshots/03-report-rendered.png)
+*The standalone Markdown deliverable, viewed in the repository.*
