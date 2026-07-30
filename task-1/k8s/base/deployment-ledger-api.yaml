@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: ledger-api
-          image: ghcr.io/amreensk16/ledger-api:d006d80
+          image: ghcr.io/amreensk16/ledger-api@sha256:605781215887b2e74a8172c40bc187b03f68fa6b8e4bc4950d3f49fe52734bf1
           imagePullPolicy: IfNotPresent
           securityContext:
             runAsNonRoot: true
