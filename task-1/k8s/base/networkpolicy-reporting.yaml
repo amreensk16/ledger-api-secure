@@ -1,7 +1,12 @@
 # reporting is a read-only observer (RBAC scoped to get/list/watch pods and
 # services - see rbac-reporting.yaml) and is demonstrated purely via
 # `kubectl auth can-i --as=...` from outside the cluster, so it needs no
-# inbound access and no egress beyond DNS.
+# inbound access. Task 3 adds two egress allowances once reporting is
+# brought into the Istio mesh: istiod (for its sidecar's workload
+# certificate) and ledger-api at L3/L4 (so the AuthorizationPolicy identity
+# demo isn't confounded by this NetworkPolicy also blocking it - the point
+# of that demo is that Istio denies it despite the network layer allowing
+# it).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -24,3 +29,21 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-system
+      ports:
+        - protocol: TCP
+          port: 15010
+        - protocol: TCP
+          port: 15012
+        - protocol: TCP
+          port: 15014
+    - to:
+        - podSelector:
+            matchLabels:
+              app: ledger-api
+      ports:
+        - protocol: TCP
+          port: 8080
