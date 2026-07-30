@@ -1,11 +1,14 @@
 name: task-1-build
 
+# Superseded by task-2-pipeline.yml, which builds the same app/task-1/app
+# with real security gates (SAST/secrets/SCA/image scans), dual cosign
+# signing (keyless + this workflow's static key pair, so Task 1's live
+# Kyverno policy keeps working), SLSA-style provenance, and a GitOps
+# deploy step. Keeping this workflow's automatic push trigger active
+# alongside task-2-pipeline.yml would race two independent, non-reproducible
+# builds under the same commit-SHA image tag. Manual dispatch is kept for
+# historical/reference use (e.g. to reproduce Task 1's build in isolation).
 on:
-  push:
-    branches: [master]
-    paths:
-      - "task-1/app/**"
-      - ".github/workflows/task-1-build.yml"
   workflow_dispatch: {}
 
 permissions:

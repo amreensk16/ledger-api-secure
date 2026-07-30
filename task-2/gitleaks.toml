@@ -1,0 +1,29 @@
+# Extends gitleaks' full default ruleset rather than replacing it.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known-fake secrets: ciphertext, a redacted historical fixture, and documented demo placeholders - not real leaked credentials"
+
+# Whole-file skips:
+#  - sealedsecret-ledger-api.yaml is Sealed-Secrets ciphertext (asymmetrically
+#    encrypted, only decryptable by the in-cluster controller's private key) -
+#    unavoidably high-entropy next to key-like field names, a textbook
+#    gitleaks false positive shape with zero actual secret risk.
+#  - insecure-baseline/deployment.yaml is a byte-for-byte copy of the
+#    ORIGINAL vulnerable manifest, kept verbatim on purpose to demonstrate
+#    admission-policy rejection (see task-1/docs/insecure-baseline/README.md).
+#    Its "secret" is already redacted in the source repo we copied it from.
+paths = [
+  '''task-1/k8s/base/sealedsecret-ledger-api\.yaml''',
+  '''task-1/docs/insecure-baseline/deployment\.yaml''',
+]
+
+# Specific fake placeholder strings used elsewhere (kept scanning the rest of
+# these files rather than skipping them entirely):
+regexes = [
+  '''sk_live_9f3a2b7c1e4d8REDACTED''',
+  '''sk_test_demo_0*''',
+  '''demo-not-a-real-password''',
+  '''P@ssw0rd123''',
+]

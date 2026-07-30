@@ -1,0 +1,11 @@
+# Tracked, time-boxed exceptions for specific CVEs someone has explicitly
+# triaged and accepted (not a blanket "no fix yet" bypass - the informational
+# scan in the pipeline already surfaces those for visibility without needing
+# an entry here). Format: CVE-ID exp:YYYY-MM-DD [reason]
+#
+# The exp: date is load-bearing: once it passes, Trivy stops honoring the
+# entry and the CVE starts hard-blocking the pipeline again, forcing a
+# re-triage rather than a silent permanent bypass.
+#
+# Example (not currently active - no CVEs have been triaged/accepted yet):
+# CVE-2024-XXXXX exp:2026-10-01 accepted: no upstream fix, low exploitability in our usage, revisit at expiry

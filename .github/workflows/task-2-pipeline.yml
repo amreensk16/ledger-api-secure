@@ -1,0 +1,291 @@
+name: task-2-pipeline
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "task-1/app/**"
+      - ".github/workflows/task-2-pipeline.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: task-2-pipeline-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  secrets-scan:
+    name: Secrets scan (gitleaks)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: task-2/gitleaks.toml
+
+  sast-semgrep:
+    name: SAST (Semgrep)
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Semgrep - blocking (ERROR severity only)
+        run: |
+          semgrep scan --config p/security-audit --config p/flask \
+            --severity ERROR --error \
+            --sarif --output semgrep-blocking.sarif task-1/app
+      - name: Upload blocking SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep-blocking.sarif
+          category: semgrep-blocking
+      - name: Semgrep - informational (all severities)
+        if: always()
+        continue-on-error: true
+        run: |
+          semgrep scan --config p/security-audit --config p/flask \
+            --sarif --output semgrep-informational.sarif task-1/app
+      - name: Upload informational SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep-informational.sarif
+          category: semgrep-informational
+
+  sca-filesystem:
+    name: Dependency/CVE scan (Trivy fs)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy fs - blocking (fixable CRITICAL/HIGH)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          scan-ref: task-1/app
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: 1
+          trivyignores: task-2/trivy/.trivyignore
+          format: sarif
+          output: trivy-fs-blocking.sarif
+      - name: Upload blocking SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-fs-blocking.sarif
+          category: trivy-fs-blocking
+      - name: Trivy fs - informational (incl. CVEs with no fix yet)
+        if: always()
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          scan-ref: task-1/app
+          severity: CRITICAL,HIGH,MEDIUM
+          exit-code: 0
+          format: sarif
+          output: trivy-fs-informational.sarif
+      - name: Upload informational SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-fs-informational.sarif
+          category: trivy-fs-informational
+
+  build-push:
+    name: Build & push image
+    needs: [secrets-scan, sast-semgrep, sca-filesystem]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ghcr.io/${{ github.repository_owner }}/ledger-api
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: task-1/app
+          push: true
+          provenance: false
+          sbom: false
+          tags: ghcr.io/${{ github.repository_owner }}/ledger-api:${{ github.sha }}
+
+  image-scan:
+    name: Image scan (Trivy)
+    needs: [build-push]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy image - blocking (fixable CRITICAL/HIGH)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: image
+          image-ref: ${{ needs.build-push.outputs.image }}@${{ needs.build-push.outputs.digest }}
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: 1
+          trivyignores: task-2/trivy/.trivyignore
+          format: sarif
+          output: trivy-image-blocking.sarif
+      - name: Upload blocking SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-image-blocking.sarif
+          category: trivy-image-blocking
+      - name: Trivy image - informational (incl. CVEs with no fix yet)
+        if: always()
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: image
+          image-ref: ${{ needs.build-push.outputs.image }}@${{ needs.build-push.outputs.digest }}
+          severity: CRITICAL,HIGH,MEDIUM
+          exit-code: 0
+          format: sarif
+          output: trivy-image-informational.sarif
+      - name: Upload informational SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-image-informational.sarif
+          category: trivy-image-informational
+
+  sign-attest:
+    name: Sign (keyless + static key) & attest provenance
+    needs: [build-push, image-scan]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write # required for keyless cosign signing via GitHub OIDC
+    steps:
+      - uses: actions/checkout@v4
+      - uses: sigstore/cosign-installer@v3
+        with:
+          # Same pin as task-1-build.yml and for the same reason: v2.x stores
+          # signatures/attestations using the legacy sha256-<digest>.sig tag
+          # scheme, which is what the already-deployed require-signed-images
+          # Kyverno policy verifies against. v3's default OCI 1.1 Referrers
+          # storage isn't reliably discoverable on GHCR - see
+          # task-1/docs/architecture.md and task-2/docs/decisions.md.
+          cosign-release: "v2.4.1"
+
+      - name: Resolve image@digest
+        id: ref
+        run: echo "ref=${{ needs.build-push.outputs.image }}@${{ needs.build-push.outputs.digest }}" >> "$GITHUB_OUTPUT"
+
+      - name: Keyless sign (OIDC/Fulcio - Task 2 requirement)
+        run: cosign sign --yes "${{ steps.ref.outputs.ref }}"
+
+      - name: Verify keyless signature (evidence)
+        run: |
+          cosign verify \
+            --certificate-identity-regexp "^https://github.com/${{ github.repository }}/" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            "${{ steps.ref.outputs.ref }}" | tee cosign-verify-keyless.txt
+
+      - name: Static-key sign (keeps Task 1's live Kyverno policy satisfied)
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: "" # matches the empty password used when cosign.key was generated
+        run: |
+          echo "$COSIGN_PRIVATE_KEY" > cosign.key
+          cosign sign --key cosign.key --tlog-upload=false --yes "${{ steps.ref.outputs.ref }}"
+          rm -f cosign.key
+
+      - name: Generate SLSA-style provenance predicate
+        run: |
+          cat > predicate.json <<EOF
+          {
+            "builder": { "id": "https://github.com/${{ github.repository }}/.github/workflows/task-2-pipeline.yml@${{ github.ref }}" },
+            "buildType": "https://github.com/actions/runner",
+            "invocation": {
+              "configSource": {
+                "uri": "git+https://github.com/${{ github.repository }}@${{ github.ref }}",
+                "digest": { "sha1": "${{ github.sha }}" },
+                "entryPoint": ".github/workflows/task-2-pipeline.yml"
+              }
+            },
+            "metadata": {
+              "buildInvocationId": "${{ github.run_id }}",
+              "completeness": { "parameters": true, "environment": false, "materials": false },
+              "reproducible": false
+            },
+            "materials": [
+              { "uri": "git+https://github.com/${{ github.repository }}@${{ github.ref }}", "digest": { "sha1": "${{ github.sha }}" } }
+            ]
+          }
+          EOF
+
+      - name: Attest SLSA-style provenance (keyless)
+        run: cosign attest --predicate predicate.json --type slsaprovenance --yes "${{ steps.ref.outputs.ref }}"
+
+      - name: Upload signing/provenance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signing-evidence-${{ github.run_id }}
+          path: |
+            cosign-verify-keyless.txt
+            predicate.json
+
+  gitops-bump:
+    name: Bump GitOps-managed image reference
+    needs: [build-push, sign-attest]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Bump image reference (pinned by digest)
+        run: |
+          NEW_IMAGE="${{ needs.build-push.outputs.image }}@${{ needs.build-push.outputs.digest }}"
+          sed -i "s#image: ghcr.io/amreensk16/ledger-api[@:].*#image: ${NEW_IMAGE}#" \
+            task-1/k8s/base/deployment-ledger-api.yaml
+          grep "image:" task-1/k8s/base/deployment-ledger-api.yaml
+
+      - name: Commit and push (bot identity, default GITHUB_TOKEN)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add task-1/k8s/base/deployment-ledger-api.yaml
+          if git diff --cached --quiet; then
+            echo "No change to commit (image reference already up to date)"
+          else
+            git commit -m "chore(gitops): bump ledger-api image to ${{ needs.build-push.outputs.digest }} [skip ci]"
+            git push
+          fi

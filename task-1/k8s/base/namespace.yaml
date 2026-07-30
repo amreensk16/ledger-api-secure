@@ -2,6 +2,10 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: payments
+  annotations:
+    # Task 2 (ArgoCD/GitOps) manages and diffs this namespace but must never
+    # prune or delete it - e.g. if the Application CR is ever removed.
+    argocd.argoproj.io/sync-options: Prune=false
   labels:
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/enforce-version: latest
