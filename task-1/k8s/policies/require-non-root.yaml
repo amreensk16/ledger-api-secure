@@ -8,7 +8,11 @@ metadata:
     policies.kyverno.io/description: >-
       Containers must not run as root. Requires runAsNonRoot=true at both the
       pod and container level, dropping ALL capabilities, no privilege
-      escalation, and a RuntimeDefault seccomp profile.
+      escalation, and a RuntimeDefault seccomp profile. Scoped to the
+      payments namespace - this is ledger-api's own guardrail, not a
+      cluster-wide mandate on third-party infrastructure charts (ArgoCD,
+      Kyverno itself, ingress-nginx, etc.) that we don't author and can't
+      always control the securityContext of.
 spec:
   background: true
   rules:
@@ -17,6 +21,7 @@ spec:
         any:
           - resources:
               kinds: ["Pod"]
+              namespaces: ["payments"]
       validate:
         failureAction: Enforce
         message: >-

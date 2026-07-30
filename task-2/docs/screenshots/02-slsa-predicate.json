@@ -1,0 +1,19 @@
+{
+  "builder": { "id": "https://github.com/amreensk16/ledger-api-secure/.github/workflows/task-2-pipeline.yml@refs/heads/master" },
+  "buildType": "https://github.com/actions/runner",
+  "invocation": {
+    "configSource": {
+      "uri": "git+https://github.com/amreensk16/ledger-api-secure@refs/heads/master",
+      "digest": { "sha1": "8c936157c9b505ebe1a06c558a702b7b705cd2ad" },
+      "entryPoint": ".github/workflows/task-2-pipeline.yml"
+    }
+  },
+  "metadata": {
+    "buildInvocationId": "30520376705",
+    "completeness": { "parameters": true, "environment": false, "materials": false },
+    "reproducible": false
+  },
+  "materials": [
+    { "uri": "git+https://github.com/amreensk16/ledger-api-secure@refs/heads/master", "digest": { "sha1": "8c936157c9b505ebe1a06c558a702b7b705cd2ad" } }
+  ]
+}

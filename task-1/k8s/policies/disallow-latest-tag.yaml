@@ -17,6 +17,7 @@ spec:
         any:
           - resources:
               kinds: ["Pod"]
+              namespaces: ["payments"]
       validate:
         failureAction: Enforce
         message: "An explicit image tag is required (a bare image name defaults to :latest)."
@@ -33,6 +34,7 @@ spec:
         any:
           - resources:
               kinds: ["Pod"]
+              namespaces: ["payments"]
       validate:
         failureAction: Enforce
         message: "The ':latest' tag is not allowed; use an immutable version tag or digest."

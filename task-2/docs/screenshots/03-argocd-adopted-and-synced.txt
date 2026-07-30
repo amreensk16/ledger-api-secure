@@ -1,0 +1,20 @@
+== ArgoCD Application adopted the existing payments resources ==
+NAME         SYNC STATUS   HEALTH STATUS   REVISION                                   PROJECT
+ledger-api   Synced        Healthy         85ccb28fffe6bcd1446bf3c6faba2665fa98d5da   default
+
+== Running pods use the CI-built, dual-signed, digest-pinned image ==
+NAME                         READY   STATUS    RESTARTS      AGE     IP            NODE                          NOMINATED NODE   READINESS GATES
+ledger-api-fc6b96b65-2jwnj   1/1     Running   0             96s     10.244.0.24   ledger-secure-control-plane   <none>           <none>
+ledger-api-fc6b96b65-fwmjv   1/1     Running   0             74s     10.244.0.25   ledger-secure-control-plane   <none>           <none>
+ledger-api-fc6b96b65-kpbws   1/1     Running   0             2m29s   10.244.0.23   ledger-secure-control-plane   <none>           <none>
+reporting-5fd57bd9bc-zkhgf   1/1     Running   1 (14h ago)   20h     10.244.0.2    ledger-secure-control-plane   <none>           <none>
+
+== Kyverno admitted it (static-key signature still verifies) ==
+ledger-api-fc6b96b65-2jwnj	ghcr.io/amreensk16/ledger-api@sha256:605781215887b2e74a8172c40bc187b03f68fa6b8e4bc4950d3f49fe52734bf1
+ledger-api-fc6b96b65-fwmjv	ghcr.io/amreensk16/ledger-api@sha256:605781215887b2e74a8172c40bc187b03f68fa6b8e4bc4950d3f49fe52734bf1
+ledger-api-fc6b96b65-kpbws	ghcr.io/amreensk16/ledger-api@sha256:605781215887b2e74a8172c40bc187b03f68fa6b8e4bc4950d3f49fe52734bf1
+reporting-5fd57bd9bc-zkhgf	curlimages/curl:8.10.1
+
+== App still reachable via Ingress ==
+{"env":"production","status":"ok"}
+

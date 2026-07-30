@@ -6,7 +6,7 @@ tooling: a `kind` Kubernetes cluster + GitHub Actions, no cloud account.
 | Task | What it covers | Status |
 |---|---|---|
 | [`task-1/`](task-1/) | Deploy & harden `ledger-api`: securityContext, RBAC, Sealed Secrets, Kyverno admission policies, PSA `restricted` | ✅ complete |
-| `task-2/` | Secure CI/CD & software supply chain: SAST/SCA/secrets/image scanning gates, keyless cosign + SLSA provenance, GitOps with ArgoCD | 🚧 in progress |
+| [`task-2/`](task-2/) | Secure CI/CD & software supply chain: SAST/SCA/secrets/image scanning gates, keyless cosign + SLSA provenance, GitOps with ArgoCD | ✅ complete |
 | `task-3/` | Istio service mesh: mTLS STRICT, identity-based `AuthorizationPolicy`, defense-in-depth with NetworkPolicy | ⏳ not started |
 | `task-4/` | Recon (OSINT) + authorized penetration test, delivered as a standalone report | ⏳ not started |
 
@@ -19,11 +19,19 @@ full detail. This top-level README is just the index.
 - Everything runs on the same local `kind` cluster (`ledger-secure`) created
   for Task 1 - Task 2's GitOps and Task 3's mesh both build on top of the
   `payments` namespace and workloads defined in `task-1/k8s/base/`.
-- The container image lives at `ghcr.io/amreensk16/ledger-api` - Task 1's
-  workflow (`.github/workflows/task-1-build.yml`) builds/signs it with a
-  static cosign key pair; Task 2 replaces that with keyless (OIDC/Fulcio)
-  signing plus SLSA provenance, as a strictly more rigorous supply-chain
-  story for the same image.
+- The container image lives at `ghcr.io/amreensk16/ledger-api`. Task 1's
+  workflow (`.github/workflows/task-1-build.yml`, now manual-dispatch only)
+  established static cosign key-pair signing, which the live Kyverno
+  `require-signed-images` policy trusts. Task 2's pipeline
+  (`.github/workflows/task-2-pipeline.yml`) is the real, automatic delivery
+  path: it scans, builds, signs the image **twice** (keyless for a modern
+  supply-chain story + the same static key so Task 1's policy keeps working),
+  attaches SLSA-style provenance, and hands off to ArgoCD via a GitOps
+  image-tag bump - see `task-2/README.md` for the full reasoning.
+- Task 1's `require-non-root-user`/`disallow-latest-tag` Kyverno policies
+  are scoped to the `payments` namespace (not cluster-wide) precisely so
+  Task 2's ArgoCD install - and Task 3's Istio install - aren't blocked by
+  guardrails meant for ledger-api's own workloads.
 - Task 4's passive recon (Part A) targets `dodopayments.tech` using only
   public data sources, per the assignment's rules of engagement. Active
   testing (Part B) targets only the explicitly authorized local vulnerable

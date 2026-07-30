@@ -1,0 +1,24 @@
+=== 1. Baseline: ArgoCD reports Synced/Healthy, 3 replicas ===
+NAME         SYNC STATUS   HEALTH STATUS   REVISION                                   PROJECT
+ledger-api   Synced        Healthy         85ccb28fffe6bcd1446bf3c6faba2665fa98d5da   default
+NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+ledger-api   3/3     3            3           20h
+
+=== 2. Manual, out-of-band drift: scale to 5 replicas via kubectl (bypasses git) ===
+deployment.apps/ledger-api scaled
+NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+ledger-api   3/5     5            3           20h
+
+=== 3. ArgoCD detects drift (OutOfSync) ===
+check 1: sync=OutOfSync
+NAME         SYNC STATUS   HEALTH STATUS   REVISION                                   PROJECT
+ledger-api   OutOfSync     Progressing     85ccb28fffe6bcd1446bf3c6faba2665fa98d5da   default
+
+=== 4. Self-heal: ArgoCD reverts to the git-declared state (3 replicas) without manual sync ===
+check 1: replicas=5 sync=OutOfSync
+check 2: replicas=3 sync=OutOfSync
+check 3: replicas=3 sync=Synced
+NAME         SYNC STATUS   HEALTH STATUS   REVISION                                   PROJECT
+ledger-api   Synced        Healthy         85ccb28fffe6bcd1446bf3c6faba2665fa98d5da   default
+NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+ledger-api   3/3     3            3           20h
