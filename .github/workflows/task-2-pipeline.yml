@@ -75,7 +75,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Trivy fs - blocking (fixable CRITICAL/HIGH)
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: task-1/app
@@ -94,7 +94,7 @@ jobs:
       - name: Trivy fs - informational (incl. CVEs with no fix yet)
         if: always()
         continue-on-error: true
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: task-1/app
@@ -147,7 +147,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Trivy image - blocking (fixable CRITICAL/HIGH)
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: image
           image-ref: ${{ needs.build-push.outputs.image }}@${{ needs.build-push.outputs.digest }}
@@ -166,7 +166,7 @@ jobs:
       - name: Trivy image - informational (incl. CVEs with no fix yet)
         if: always()
         continue-on-error: true
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: image
           image-ref: ${{ needs.build-push.outputs.image }}@${{ needs.build-push.outputs.digest }}

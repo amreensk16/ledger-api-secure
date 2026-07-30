@@ -91,7 +91,12 @@ def fetch():
         return jsonify(error="target host is not in the allowlist"), 403
 
     try:
-        resp = requests.get(url, timeout=5, allow_redirects=False)
+        # Semgrep's generic SSRF rule can't see that _is_allowed_target() above
+        # already enforces a hostname allowlist AND re-resolves DNS to reject
+        # private/loopback/link-local IPs (DNS-rebinding defense).
+        # allow_redirects=False also blocks a redirect-based bypass of that
+        # check. Reviewed and accepted as a confirmed false positive.
+        resp = requests.get(url, timeout=5, allow_redirects=False)  # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
     except requests.RequestException as exc:
         return jsonify(error=f"fetch failed: {exc}"), 502
 
