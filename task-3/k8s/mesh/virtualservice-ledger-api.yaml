@@ -1,0 +1,23 @@
+# Routes ledger.local traffic arriving at the gateway to ledger-api, weighted
+# 90/10 across the v1/v2 DestinationRule subsets - a canary release: a small
+# slice of traffic reaches the new version before it gets the full load.
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: ledger-api
+  namespace: payments
+spec:
+  hosts:
+    - "ledger.local"
+  gateways:
+    - ledger-api-gateway
+  http:
+    - route:
+        - destination:
+            host: ledger-api.payments.svc.cluster.local
+            subset: v1
+          weight: 90
+        - destination:
+            host: ledger-api.payments.svc.cluster.local
+            subset: v2
+          weight: 10

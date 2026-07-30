@@ -1,0 +1,18 @@
+== ledger-api pods now run with an injected Istio sidecar, admitted cleanly by PSA restricted + Kyverno ==
+NAME                          READY   STATUS    RESTARTS      AGE   IP            NODE                          NOMINATED NODE   READINESS GATES
+ledger-api-7c89449478-4pfvw   2/2     Running   1 (26m ago)   36m   10.244.0.37   ledger-secure-control-plane   <none>           <none>
+ledger-api-7c89449478-bfnbd   2/2     Running   0             20m   10.244.0.38   ledger-secure-control-plane   <none>           <none>
+ledger-api-7c89449478-c8k9l   2/2     Running   0             20m   10.244.0.39   ledger-secure-control-plane   <none>           <none>
+
+== Istio uses the native K8s sidecar mechanism (initContainers with restartPolicy: Always), not a legacy privileged istio-init ==
+istio-validation restartPolicy=
+istio-proxy restartPolicy=Always
+
+== istio-validation container securityContext (no NET_ADMIN/NET_RAW - CNI plugin handles iptables externally) ==
+{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsGroup":1337,"runAsNonRoot":true,"runAsUser":1337}
+
+== istio-proxy sidecar securityContext (non-root uid 1337, all capabilities dropped, read-only rootfs) ==
+{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsGroup":1337,"runAsNonRoot":true,"runAsUser":1337}
+
+== seccompProfile: not redeclared per-container, inherited from pod-level (RuntimeDefault) - satisfies both PSA and Kyverno ==
+{"fsGroup":10001,"runAsGroup":10001,"runAsNonRoot":true,"runAsUser":10001,"seccompProfile":{"type":"RuntimeDefault"}}

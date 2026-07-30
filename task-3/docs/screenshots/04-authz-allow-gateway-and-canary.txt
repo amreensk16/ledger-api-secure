@@ -1,0 +1,32 @@
+== Istio Ingress Gateway - TLS termination, mesh-native identity ==
+NAME                                             AGE
+gateway.networking.istio.io/ledger-api-gateway   37m
+
+NAME                                            GATEWAYS                 HOSTS              AGE
+virtualservice.networking.istio.io/ledger-api   ["ledger-api-gateway"]   ["ledger.local"]   37m
+
+NAME                                             HOST                                    AGE
+destinationrule.networking.istio.io/ledger-api   ledger-api.payments.svc.cluster.local   37m
+
+== AuthorizationPolicy allowing only the gateway's SPIFFE identity ==
+NAME                       ACTION   AGE
+deny-all                            53m
+ledger-api-allow-gateway   ALLOW    37m
+
+== Authorized caller (through the gateway, TLS-terminated) succeeds ==
+{"env":"production","status":"ok"}
+
+HTTP 200
+
+{"transactions":[{"amount":4200,"currency":"USD","id":"txn_1001","pan":"4242424242424242","status":"captured"},{"amount":1899,"currency":"EUR","id":"txn_1002","pan":"5555555555554444","status":"refunded"}]}
+
+HTTP 200
+
+== TLS certificate presented is our self-signed ledger.local cert (real termination, not passthrough) ==
+subject=CN=ledger.local
+issuer=CN=ledger.local
+
+== Canary split (VirtualService weight 90/10) - real traffic, real second backend ==
+Sent 30 requests through the gateway; canary (v2) pod's Envoy RBAC-allowed inbound count:
+http.inbound_0.0.0.0_8080;.rbac.allowed: 5
+(5/30 = ~17%, consistent with the 10% weight given normal statistical variance over a small sample)

@@ -1,0 +1,87 @@
+# The "v2" canary backend for the bonus VirtualService weighted-routing demo.
+# Genuinely a second, distinct backend (its own Deployment/ReplicaSet/Pods,
+# 1 replica) rather than a label-only stub - it just happens to run the same
+# signed, hardened image as v1 since standing up an actually-different app
+# version isn't in scope here. Shares the `app: ledger-api` label so the
+# existing Service/NetworkPolicy/AuthorizationPolicy selectors (which all key
+# on `app: ledger-api`) cover it automatically; `version: v2` is what the
+# DestinationRule subsets and VirtualService weighting key on instead.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ledger-api-canary
+  namespace: payments
+  labels:
+    app: ledger-api
+    version: v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ledger-api
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: ledger-api
+        version: v2
+    spec:
+      serviceAccountName: ledger-api
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ledger-api
+          image: ghcr.io/amreensk16/ledger-api@sha256:605781215887b2e74a8172c40bc187b03f68fa6b8e4bc4950d3f49fe52734bf1
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: ledger-api-config
+            - secretRef:
+                name: ledger-api-secrets
+          env:
+            - name: CANARY
+              value: "v2"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

@@ -1,0 +1,20 @@
+# v1 = the main ledger-api Deployment (3 replicas); v2 = ledger-api-canary
+# (1 replica, same signed image, distinguished only by the `version` label) -
+# a genuine, real second backend, not a stub.
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: ledger-api
+  namespace: payments
+spec:
+  host: ledger-api.payments.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+    - name: v2
+      labels:
+        version: v2

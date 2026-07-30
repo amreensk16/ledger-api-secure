@@ -1,0 +1,10 @@
+# Istio's documented default-deny idiom: an ALLOW-type policy (the implicit
+# default action) selecting every workload in the namespace, with no rules
+# at all. An empty rule set matches nothing, so nothing is allowed unless a
+# more specific AuthorizationPolicy explicitly permits it.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-all
+  namespace: payments
+spec: {}

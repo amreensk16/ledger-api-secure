@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mesh-policy
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/amreensk16/ledger-api-secure.git
+    targetRevision: master
+    path: task-3/k8s/mesh
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: payments
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

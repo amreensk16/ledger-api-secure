@@ -1,0 +1,12 @@
+# Requires mTLS for every workload in `payments` - a plaintext connection is
+# refused at the destination's Envoy sidecar before it ever reaches the
+# application. Namespace-scoped (not mesh-wide) to keep blast radius limited
+# to the workload this assignment is about.
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: payments
+spec:
+  mtls:
+    mode: STRICT

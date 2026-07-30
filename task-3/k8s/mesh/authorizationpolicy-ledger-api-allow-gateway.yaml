@@ -1,0 +1,24 @@
+# The one explicit exception to deny-all: the Istio ingress gateway's own
+# SPIFFE identity may reach ledger-api's /health and /transactions endpoints.
+# Keyed on principal (cryptographically verified via its mTLS client cert),
+# never on IP - this is what "identity-based, not IP-based" means in
+# practice.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: ledger-api-allow-gateway
+  namespace: payments
+spec:
+  selector:
+    matchLabels:
+      app: ledger-api
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"
+      to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/health", "/transactions"]

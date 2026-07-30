@@ -1,0 +1,15 @@
+== Even with Istio mTLS/AuthorizationPolicy active, NetworkPolicy independently blocks ==
+== an unrelated namespace's plaintext attempt at the network layer (L3/L4), before it ==
+== would ever reach Envoy's identity check ==
+
+curl from an unrelated pod in the default namespace:
+curl: (28) Connection timed out after 3001 milliseconds
+HTTP_CODE=000
+
+This demonstrates the two layers are complementary, not redundant:
+- NetworkPolicy (kernel/netfilter, L3/L4): blocks based on IP/namespace/port -
+  catches raw traffic and works even if Envoy itself were bypassed or buggy.
+- Istio mTLS + AuthorizationPolicy (userspace sidecar, L7, SPIFFE identity):
+  catches identity spoofing NetworkPolicy cannot - a workload can't fake
+  ledger-api's or reporting's SPIFFE identity without its private key, and
+  authorization is enforced on WHO is calling, not merely WHERE from.

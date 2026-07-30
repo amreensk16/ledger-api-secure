@@ -1,0 +1,27 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: ledger-secure-istio
+spec:
+  profile: default
+  components:
+    cni:
+      enabled: true
+      namespace: kube-system
+    ingressGateways:
+      - name: istio-ingressgateway
+        enabled: true
+  values:
+    cni:
+      # Ambient/sidecar iptables setup happens in this privileged per-node
+      # DaemonSet instead of an in-pod istio-init container - so application
+      # pods (and the istio-proxy sidecar itself) never need NET_ADMIN/
+      # NET_RAW, keeping them compliant with the payments namespace's PSA
+      # `restricted` label and Kyverno's require-non-root-user policy.
+      cniConfDir: /etc/cni/net.d
+      cniBinDir: /opt/cni/bin
+    global:
+      proxy:
+        # Belt-and-suspenders alongside CNI mode: explicit hardened defaults
+        # for the istio-proxy sidecar container itself.
+        privileged: false

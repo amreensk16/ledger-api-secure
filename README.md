@@ -7,7 +7,7 @@ tooling: a `kind` Kubernetes cluster + GitHub Actions, no cloud account.
 |---|---|---|
 | [`task-1/`](task-1/) | Deploy & harden `ledger-api`: securityContext, RBAC, Sealed Secrets, Kyverno admission policies, PSA `restricted` | ✅ complete |
 | [`task-2/`](task-2/) | Secure CI/CD & software supply chain: SAST/SCA/secrets/image scanning gates, keyless cosign + SLSA provenance, GitOps with ArgoCD | ✅ complete |
-| `task-3/` | Istio service mesh: mTLS STRICT, identity-based `AuthorizationPolicy`, defense-in-depth with NetworkPolicy | ⏳ not started |
+| [`task-3/`](task-3/) | Istio service mesh: mTLS STRICT, identity-based `AuthorizationPolicy`, defense-in-depth with NetworkPolicy | ✅ complete |
 | `task-4/` | Recon (OSINT) + authorized penetration test, delivered as a standalone report | ⏳ not started |
 
 Each task folder has its own README with the approach, design decisions,
@@ -32,6 +32,12 @@ full detail. This top-level README is just the index.
   are scoped to the `payments` namespace (not cluster-wide) precisely so
   Task 2's ArgoCD install - and Task 3's Istio install - aren't blocked by
   guardrails meant for ledger-api's own workloads.
+- Task 3 brought both `ledger-api` and `reporting` into an Istio mesh with
+  STRICT mTLS - this genuinely broke ingress-nginx's plaintext path to
+  `ledger-api` (a non-mesh caller has no identity to present), so the Istio
+  Ingress Gateway now replaces it as the access path. `task-1/scripts/verify-all.sh`'s
+  ingress-nginx health check is expected to fail from here on - see
+  `task-3/README.md`'s "Known, intentional regression" section.
 - Task 4's passive recon (Part A) targets `dodopayments.tech` using only
   public data sources, per the assignment's rules of engagement. Active
   testing (Part B) targets only the explicitly authorized local vulnerable

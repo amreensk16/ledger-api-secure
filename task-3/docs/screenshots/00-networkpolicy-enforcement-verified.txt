@@ -1,0 +1,24 @@
+== CNI in use ==
+NAME            READY   STATUS    RESTARTS      AGE   IP           NODE                          NOMINATED NODE   READINESS GATES
+kindnet-kvttx   1/1     Running   1 (14h ago)   22h   172.20.0.2   ledger-secure-control-plane   <none>           <none>
+kind v0.32.0 go1.26.3 windows/amd64
+Client Version: v1.34.1
+Kustomize Version: v5.7.1
+Server Version: v1.36.1
+Warning: version difference between client (1.34) and server (1.36) exceeds the supported minor version skew of +/-1
+
+== Test 1: reporting -> ledger-api (NOT allow-listed; expect BLOCKED) ==
+HTTP 000
+curl: (28) Connection timed out after 3003 milliseconds
+command terminated with exit code 28
+BLOCKED (connection timed out) - NetworkPolicy enforced
+
+== Test 2: unrelated pod in default namespace -> ledger-api (expect BLOCKED) ==
+curl: (28) Connection timed out after 3002 milliseconds
+HTTP 000
+
+== Test 3: ingress-nginx namespace -> ledger-api (IS allow-listed; expect 200) ==
+HTTP 200
+
+CONCLUSION: NetworkPolicy IS enforced in this cluster - allowed traffic succeeds (200),
+non-allow-listed traffic from both an in-namespace neighbour and an unrelated namespace times out.

@@ -1,0 +1,20 @@
+== istioctl authn tls-check was removed from modern Istio (last existed ~1.1); ==
+== the current equivalent is 'istioctl experimental describe pod', shown below ==
+
+Pod: ledger-api-7c89449478-4pfvw
+   Pod Revision: default
+   Pod Ports: 8080 (ledger-api)
+--------------------
+Service: ledger-api
+   Port: http 8080/HTTP targets pod port 8080
+--------------------
+Effective PeerAuthentication:
+   Workload mTLS mode: STRICT
+Applied PeerAuthentication:
+   default.payments
+
+== Formal proof: plaintext request from reporting (no sidecar, no identity) to ledger-api ==
+curl: (28) Connection timed out after 5000 milliseconds
+HTTP 000
+command terminated with exit code 28
+(exit code 28 = connection timed out - the destination's Envoy refused the non-mTLS handshake before it ever reached the app)

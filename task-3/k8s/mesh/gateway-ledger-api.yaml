@@ -1,0 +1,23 @@
+# North-south entrypoint into the mesh, replacing ingress-nginx for
+# ledger-api specifically (see task-3/docs/decisions.md - once payments is
+# STRICT mTLS, a plaintext, non-mesh client like ingress-nginx can no longer
+# reach it at all; this gateway is itself a mesh member with a verifiable
+# SPIFFE identity, so it can originate mTLS to the backend).
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: ledger-api-gateway
+  namespace: payments
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: ledger-local-tls
+      hosts:
+        - "ledger.local"

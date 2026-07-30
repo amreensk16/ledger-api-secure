@@ -1,0 +1,18 @@
+== The mesh trust root: istiod's self-signed root CA (auto-generated at install) ==
+subject=O=cluster.local
+issuer=O=cluster.local
+notBefore=Jul 30 07:44:52 2026 GMT
+notAfter=Jul 27 07:44:52 2036 GMT
+
+== A real, currently-issued workload certificate (ledger-api's sidecar) ==
+subject=
+issuer=O=cluster.local
+notBefore=Jul 30 09:24:54 2026 GMT
+notAfter=Jul 31 09:26:54 2026 GMT
+X509v3 Subject Alternative Name: critical
+    URI:spiffe://cluster.local/ns/payments/sa/ledger-api
+
+Note the SPIFFE URI SAN (spiffe://cluster.local/ns/payments/sa/ledger-api) is the
+cryptographic identity AuthorizationPolicy principals key on - and the ~24h validity
+window (notBefore to notAfter) proves short-lived, auto-rotated certs, not a
+long-lived static credential.

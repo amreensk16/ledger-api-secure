@@ -1,0 +1,24 @@
+== reporting now has a valid Istio identity (sidecar injected, mTLS handshake succeeds) ==
+Pod: reporting-5d6798b74c-vr7g4
+   Pod Revision: default
+   Pod does not expose ports
+Warning: No Kubernetes Services select pod reporting-5d6798b74c-vr7g4 (see https://istio.io/docs/setup/kubernetes/additional-setup/requirements/ )
+--------------------
+--------------------
+Effective PeerAuthentication:
+   Workload mTLS mode: STRICT
+Applied PeerAuthentication:
+   default.payments
+
+== deny-all AuthorizationPolicy is in effect ==
+NAME       ACTION   AGE
+deny-all            10m
+
+== reporting -> ledger-api: authenticated (valid mTLS cert) but NOT authorized ==
+HTTP 403
+curl: (23) client returned ERROR on write of 19 bytes
+command terminated with exit code 23
+
+This is a 403 from Envoy's RBAC filter, not a connection-level failure like stage 1's
+plaintext refusal - proving the block is based on WHO is calling (SPIFFE identity
+spiffe://cluster.local/ns/payments/sa/reporting), not merely whether TLS was used.
