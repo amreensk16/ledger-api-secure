@@ -1,4 +1,4 @@
-# Dodo Payments security assessment — ledger-api-secure
+# ledger-api-secure
 
 A four-part cloud-native security assessment built entirely on free, local
 tooling: a `kind` Kubernetes cluster + GitHub Actions, no cloud account.
